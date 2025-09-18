@@ -1,7 +1,9 @@
 const EXAMPLES = [
-  "Summarize: Why React hooks matter?",
-  "Give me 3 UX states for a search form.",
-  "Draft a one-paragraph bio for a student developer.",
+  "Why do React hooks matter?",
+  "What are the UX states for a search form?",
+  "Write a developer bio for me",
+  "Explain JavaScript closures",
+  "How do I improve my UI design?",
 ];
 
 export default function ExampleChips({ onPick }) {
