@@ -5,5 +5,5 @@ import react from '@vitejs/plugin-react'
 // IMPORTANT: replace <repo> with your repo name
 export default defineConfig({
   plugins: [react()],
-  base: '/<repo>/', 
+  base: '/AI-chat-demo/', 
 })
