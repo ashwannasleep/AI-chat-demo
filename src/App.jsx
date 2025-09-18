@@ -123,17 +123,16 @@ export default function App() {
             onKeyDown={onKeyDown}
             aria-label="Message input"
           />
-          {!busy ? (
-            <button type="submit" className="px-4 py-2 rounded-xl bg-blue-600 text-white">Send</button>
-          ) : (
-            <button type="button" onClick={stop} className="px-4 py-2 rounded-xl bg-gray-200">Stop</button>
-          )}
+          <button
+            type="submit"
+            disabled={!input.trim() || busy}
+            className="px-4 py-2 rounded-xl bg-blue-600 text-white disabled:opacity-50"
+          >
+            Send
+          </button>
         </form>
       </main>
 
-      <footer className="mt-4 text-xs text-gray-500">
-        Demo mode: keys are kept in <code>sessionStorage</code>, requests go directly from your browser to OpenAI.
-      </footer>
 
       <Toast message={err} kind={status === 'Error' ? 'error' : 'info'} />
     </div>
