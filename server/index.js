@@ -11,8 +11,8 @@ app.use(express.json());
 
 // Initialize OpenAI client only if API key is available
 let openai = null;
-if (process.env.OPENAI_API_KEY) {
-  openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+if (process.env.OPENAI_API_KEY) { // eslint-disable-line no-undef
+  openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY }); // eslint-disable-line no-undef
   console.log('✅ OpenAI client initialized');
 } else {
   console.log('⚠️  No OpenAI API key found - server will run in demo mode');
@@ -58,5 +58,5 @@ app.use(express.static(distPath));
 // Catch-all handler: send back React's index.html file for any non-API routes
 app.get('*', (_, res) => res.sendFile(path.join(distPath, 'index.html')));
 
-const PORT = process.env.PORT || 5174;
+const PORT = process.env.PORT || 5174; // eslint-disable-line no-undef
 app.listen(PORT, () => console.log(`Server listening on http://localhost:${PORT}`));
