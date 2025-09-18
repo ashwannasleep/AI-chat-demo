@@ -39,13 +39,26 @@ function generateSmartResponse(userMessage) {
     return "Great UI design makes users happy! Here's how to improve:\n\n• **Visual Hierarchy**: Use size, color, and spacing\n• **Consistency**: Maintain design patterns\n• **Whitespace**: Give elements room to breathe\n• **Typography**: Choose readable fonts\n• **Color**: Use a limited, meaningful palette\n• **Accessibility**: Design for all users\n\nStart with one area and iterate!";
   }
   
+  // Time questions
+  if (message.includes('time') || message.includes('what time')) {
+    const now = new Date();
+    const timeString = now.toLocaleTimeString();
+    const dateString = now.toLocaleDateString();
+    return `The current time is **${timeString}** on **${dateString}**.\n\n⏰ Time zone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}\n📅 Day: ${now.toLocaleDateString('en-US', { weekday: 'long' })}\n\nIs there anything else I can help you with?`;
+  }
+  
+  // Weather questions
+  if (message.includes('weather') || message.includes('temperature') || message.includes('rain')) {
+    return "I'd love to help with weather info, but I'm a demo AI assistant! 🌤️\n\nFor real weather data, try:\n• **Weather apps**: AccuWeather, Weather.com\n• **Voice assistants**: \"Hey Siri, what's the weather?\"\n• **Web search**: Google \"weather in [your city]\"\n\nWhat else can I help you with?";
+  }
+  
   // General questions
   if (message.includes('hello') || message.includes('hi') || message.includes('hey')) {
     return "Hello! I'm your AI assistant. I can help you with:\n\n• React and JavaScript development\n• UX/UI design principles\n• Writing developer bios\n• Code best practices\n• Technical explanations\n\nWhat would you like to know?";
   }
   
-  // Default contextual response
-  return `That's a great question about "${userMessage}"! Here's what I think:\n\n• **Key Point 1**: This is important because...\n• **Key Point 2**: You should also consider...\n• **Next Steps**: I'd recommend trying...\n\nWould you like me to elaborate on any of these points?`;
+  // Default contextual response - much better than template
+  return `I understand you're asking about "${userMessage}". While I'm a demo AI focused on development topics, I can help you with:\n\n• **React & JavaScript**: Hooks, components, best practices\n• **UX/UI Design**: User experience, interface design\n• **Development**: Code structure, debugging tips\n• **Career**: Developer bios, portfolio advice\n\nTry asking about one of these topics, or click an example above!`;
 }
 
 // Demo mode chat function (no API key required)
