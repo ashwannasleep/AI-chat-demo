@@ -16,3 +16,9 @@ This project showcases how to build a modern AI chat UI that remains responsive 
 - explicit empty / loading/error states
 - user controls during long-running requests
 - accessibility-first interaction design
+
+## Architecture (High-level)
+
+- React UI handles streaming tokens and UX state transitions
+- Centralized chat state manages messages, retries, and cancellations
+- Express API proxies OpenAI requests and streams responses to the client
