@@ -3,5 +3,13 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: '/AI-chat-demo/', 
+  base: '/AI-chat-demo/',
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5174',
+        changeOrigin: true,
+      },
+    },
+  },
 })

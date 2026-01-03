@@ -1,95 +1,65 @@
-import OpenAI from 'openai';
+const templates = {
+  checkout: `Summary: tighten payment flow; keep users informed and safe.
+• Missing states: empty cart helpers, payment skeletons, address lookup loading, 3DS/auth step
+• UX recs: inline field errors with focus, persist cart/promo, show totals while loading, receipt with retry for partial fails
+• Copy tweak: “We’re processing your payment—stay on this page” near the button
+• Next step: paste your payment form fields and error copy; I’ll rewrite them`,
+  search: `Summary: keep users oriented while searching and failing gracefully.
+• Missing states: empty guidance (filters/examples), loading skeleton + active filters, no-results with refine hints, rate-limit/timeout
+• UX recs: keep query in input, debounce w/ visual feedback, “clear filters” affordance, sticky sort/filter chips
+• Copy tweak: “No results for X. Try fewer filters or a broader term.”
+• Next step: share your current empty/no-results UI; I’ll draft improved copy/layout`,
+  onboarding: `Summary: smooth first run with progress and recovery.
+• Missing states: empty dashboard placeholder, progressive loading for stats, offline/slow-state, skip/“do later” for steps
+• UX recs: checklist with completion %, save-as-draft, prefill defaults, celebrate completion with next best action
+• Copy tweak: “Almost there—finish profile to unlock reminders. You can save and finish later.”
+• Next step: list your onboarding steps; I’ll map the states and copy per step`,
+  chat: `Summary: streaming UX with resilient error handling.
+• Missing states: first-time tips, slow/streaming indicator, model error w/ retry, rate-limit/backoff notice
+• UX recs: keep input on errors, allow resending last message, show citations/ids near responses, copy button per message
+• Copy tweak: “We hit a snag. Your last message is saved—try again or switch to Demo mode.”
+• Next step: tell me which states you show today; I’ll add missing ones with copy`,
+  form: `Summary: preserve work and guide fixes.
+• Missing states: empty defaults/hints, per-field loading (lookups), offline draft, partial save vs submit
+• UX recs: inline errors on blur, summary at top after submit, preserve input on retry, autosave each section
+• Copy tweak: “We saved your progress. Fix the highlighted fields and submit again.”
+• Next step: share a sample field with its errors; I’ll rewrite the UX/copy`,
+};
 
-// Smart mock responses that actually respond to user questions
-function generateSmartResponse(userMessage) {
-  const message = userMessage.toLowerCase();
-  
-  // React/JavaScript questions
-  if (message.includes('react') || message.includes('javascript') || message.includes('js')) {
-    return "React is a powerful library for building user interfaces! Here are the key concepts:\n\n• **Components**: Reusable UI pieces\n• **Hooks**: useState, useEffect for state management\n• **Props**: Data passed between components\n• **JSX**: HTML-like syntax in JavaScript\n\nWould you like me to explain any specific React concept in more detail?";
-  }
-  
-  // UX/UI questions
-  if (message.includes('ux') || message.includes('ui') || message.includes('design') || message.includes('user experience')) {
-    return "Great UX design focuses on user needs! Key principles:\n\n• **User Research**: Understand your audience\n• **Usability**: Make it easy to use\n• **Accessibility**: Design for everyone\n• **Consistency**: Maintain design patterns\n• **Feedback**: Show users what's happening\n\nWhat specific UX challenge are you working on?";
-  }
-  
-  // Search/form states
-  if (message.includes('search') || message.includes('form') || message.includes('states')) {
-    return "Here are the essential UX states for search forms:\n\n• **Empty**: Show examples, tips, or recent searches\n• **Loading**: Skeleton screens or progress indicators\n• **Results**: Clear, scannable results with filters\n• **No Results**: Suggest alternatives or refine search\n• **Error**: Clear error messages with retry options\n\nEach state should guide users toward their goal!";
-  }
-  
-  // Bio/writing questions
-  if (message.includes('bio') || message.includes('about') || message.includes('introduction') || message.includes('developer')) {
-    return "Here's a sample developer bio:\n\n*\"I'm a passionate full-stack developer with 2+ years building web applications. I specialize in React, Node.js, and modern JavaScript. I love creating user-friendly interfaces and solving complex problems with clean code. When I'm not coding, you'll find me contributing to open source projects or exploring new technologies.\"*\n\nKey elements: skills, experience, personality, and interests!";
-  }
-  
-  // Hooks questions
-  if (message.includes('hooks') || message.includes('usestate') || message.includes('useeffect')) {
-    return "React Hooks revolutionized functional components! Here's why they matter:\n\n• **useState**: Manage component state easily\n• **useEffect**: Handle side effects and lifecycle\n• **Custom Hooks**: Reuse logic across components\n• **No Classes**: Simpler, more readable code\n• **Better Testing**: Easier to test functions\n\nHooks make React more functional and easier to understand!";
-  }
-  
-  // JavaScript questions
-  if (message.includes('javascript') || message.includes('closure') || message.includes('async') || message.includes('promise')) {
-    return "JavaScript is powerful and flexible! Key concepts:\n\n• **Closures**: Functions that remember their environment\n• **Promises**: Handle asynchronous operations elegantly\n• **ES6+**: Modern syntax with arrow functions, destructuring\n• **DOM Manipulation**: Interact with web pages\n• **Event Handling**: Respond to user interactions\n\nWhat specific JavaScript concept would you like to explore?";
-  }
-  
-  // UI/Design improvement
-  if (message.includes('improve') || message.includes('better') || message.includes('design') || message.includes('ui')) {
-    return "Great UI design makes users happy! Here's how to improve:\n\n• **Visual Hierarchy**: Use size, color, and spacing\n• **Consistency**: Maintain design patterns\n• **Whitespace**: Give elements room to breathe\n• **Typography**: Choose readable fonts\n• **Color**: Use a limited, meaningful palette\n• **Accessibility**: Design for all users\n\nStart with one area and iterate!";
-  }
-  
-  // Time questions
-  if (message.includes('time') || message.includes('what time')) {
-    const now = new Date();
-    const timeString = now.toLocaleTimeString();
-    const dateString = now.toLocaleDateString();
-    return `The current time is **${timeString}** on **${dateString}**.\n\n⏰ Time zone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}\n📅 Day: ${now.toLocaleDateString('en-US', { weekday: 'long' })}\n\nIs there anything else I can help you with?`;
-  }
-  
-  // Weather questions
-  if (message.includes('weather') || message.includes('temperature') || message.includes('rain')) {
-    return "I'd love to help with weather info, but I'm a demo AI assistant! 🌤️\n\nFor real weather data, try:\n• **Weather apps**: AccuWeather, Weather.com\n• **Voice assistants**: \"Hey Siri, what's the weather?\"\n• **Web search**: Google \"weather in [your city]\"\n\nWhat else can I help you with?";
-  }
-  
-  // General questions
-  if (message.includes('hello') || message.includes('hi') || message.includes('hey')) {
-    return "Hello! I'm your AI assistant. I can help you with:\n\n• React and JavaScript development\n• UX/UI design principles\n• Writing developer bios\n• Code best practices\n• Technical explanations\n\nWhat would you like to know?";
-  }
-  
-  // Default contextual response - much better than template
-  return `I understand you're asking about "${userMessage}". While I'm a demo AI focused on development topics, I can help you with:\n\n• **React & JavaScript**: Hooks, components, best practices\n• **UX/UI Design**: User experience, interface design\n• **Development**: Code structure, debugging tips\n• **Career**: Developer bios, portfolio advice\n\nTry asking about one of these topics, or click an example above!`;
+function pickTemplate(text) {
+  const t = (text || '').toLowerCase();
+  if (/(checkout|cart|payment|order)/.test(t)) return templates.checkout;
+  if (/(search|results|filters)/.test(t)) return templates.search;
+  if (/(onboarding|signup|sign[- ]up|profile)/.test(t)) return templates.onboarding;
+  if (/(chat|conversation|assistant|stream)/.test(t)) return templates.chat;
+  if (/(form|input|fields)/.test(t)) return templates.form;
+  return `UX state review:
+• Missing states: onboarding/empty guidance, loading skeletons, retries with preserved input, no-results/helpful defaults
+• UX recs: show what’s happening, keep user input on errors, add clear recovery (retry/cancel/save), log states for debugging
+• Copy tweak: “We saved your progress. You can retry now or edit and submit again.”
+• Next step: tell me the screen and target audience; I’ll tailor states + copy for it`;
 }
 
-// Demo mode chat function (no API key required)
+// Local demo transport
 export async function chat(messages) {
-  // Simulate API delay for realistic UX
-  await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
-
-  // Get the last user message
+  await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 800));
   const lastUserMessage = messages.filter(m => m.role === 'user').pop();
-  const userText = lastUserMessage?.content || '';
-  
-  // Generate a smart response based on the user's question
-  const smartResponse = generateSmartResponse(userText);
-
-  return { reply: smartResponse };
+  const text = lastUserMessage?.content || '';
+  const reply = pickTemplate(text);
+  return { reply };
 }
 
-// Server-side API approach (for production with API key)
+// API transport
 export async function chatWithAPI(messages) {
   const res = await fetch('/api/chat', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ messages })
   });
-  if (!res.ok) throw new Error('API error');
-  return res.json();
-}
-
-// Client-side approach (for demo purposes with API key)
-export function getClient() {
-  const key = sessionStorage.getItem('OPENAI_API_KEY');
-  if (!key) throw new Error('Missing API key');
-  return new OpenAI({ apiKey: key, dangerouslyAllowBrowser: true });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const msg = body?.error || `API error (${res.status})`;
+    throw new Error(msg);
+  }
+  return body;
 }
